@@ -21,19 +21,19 @@ def convert_text(text):
     for line in text_lines:
         line_list.append(line)
 
-    # strip off the lines we don't need
-    line_list = line_list[3:-9]
+    # remove all entries from the list that don't start with a 4
+    # this ensures we remove all unnecessary headers and footers
+    line_list = [entry for entry in line_list if (entry.strip() and str(entry).startswith('4'))]
 
-    # combine the headings into one row
-    combined_heading = "".join(line_list[:3])
-    line_list = [combined_heading] + line_list[3:]
-    # strip whitespace and separate the first element
-    line_list[0] = re.split(r'\s{2,}', line_list[0].strip())
+    # add the headings of the report that Brittany cares about
+    heading = ["ACCT NUMBER", "CURR BAL", "CRED LIM", "NAME", "OPN DT",
+               "LST AC", "PAY DT", "LAST PAY AMT", "AMT DUE", "EXP DT", "BILL CD",
+                "BILL DAY"]
     
-    # remove all blank entries from the list
-    line_list = [item for item in line_list if isinstance(item, str) and item.strip()]
-    
-    
+    # combine the stripped list and the heading using slice notation
+    line_list[:0] = [heading]
+
+
     print(line_list[:10])    
     return
 
