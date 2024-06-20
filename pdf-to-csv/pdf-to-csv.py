@@ -15,27 +15,55 @@ def convert_text(text):
     text_lines = text.split("\n")
 
     # create a list to store each line
-    line_list = []
+    pdf_list = []
 
     # add all of the lines to the list
     for line in text_lines:
-        line_list.append(line)
+        pdf_list.append(line)
 
-    # remove all entries from the list that don't start with a 4
+    # remove all entries from the list that don't start with a number
     # this ensures we remove all unnecessary headers and footers
-    line_list = [entry for entry in line_list if (entry.strip() and str(entry).startswith('4'))]
+    pdf_list = [entry for entry in pdf_list if not re.match(r'^\s*[a-zA-Z]', entry) and not entry.isspace()]
 
-    # add the headings of the report that Brittany cares about
+    # Function to split the combined data into fields using regex
+    def split_combined_data(combined_data):
+        # Define the regex pattern to match individual data items
+        pattern = re.compile(r'\s+')
+        # Split the combined data using the regex pattern
+        split_data = re.split(pattern, combined_data.strip())
+        # Filter out empty elements
+        split_data = [item for item in split_data if item]
+        return split_data
+
+    # initiate the official list of data
+    csv_list = []
+
+    # Iterate through the list, combining every other element
+    for i in range(0, len(pdf_list), 2):
+        # Combine the current element and the next element (if it exists)
+        combined_data = pdf_list[i]
+        
+        # make sure we aren't at the end of the PDF list
+        if i + 1 < len(pdf_list):
+            combined_data += ' ' + pdf_list[i + 1]
+        
+        # Split the combined data into individual pieces of data
+        split_data = split_combined_data(combined_data)
+        
+        # Append the cleaned list of data to the final result list
+        csv_list.extend(split_data)
+
+    # create the headings of the report that Brittany cares about
     heading = ["ACCT NUMBER", "CURR BAL", "CRED LIM", "NAME", "OPN DT",
                "LST AC", "PAY DT", "LAST PAY AMT", "AMT DUE", "EXP DT", "BILL CD",
                 "BILL DAY"]
-    
+  
     # combine the stripped list and the heading using slice notation
-    line_list[:0] = [heading]
+    csv_list[:0] = [heading]
 
-
-    print(line_list[:10])    
+    print(csv_list[:10])
     return
+
 
 def write_text_to_csv(text, csv_path):
     with open(csv_path, 'w', newline='', encoding='utf-8') as file:
